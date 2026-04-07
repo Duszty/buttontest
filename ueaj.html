@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Ping</title>
+    <style>
+        body { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            background: #121212; 
+            margin: 0; 
+            font-family: sans-serif;
+        }
+        
+        #ping-btn {
+            padding: 20px 40px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            box-shadow: 0 0 15px rgba(0, 123, 255, 0.5);
+            transition: transform 0.1s;
+        }
+
+        #ping-btn:active { transform: scale(0.95); }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 20px;
+            background: #00ff88; /* Bright green */
+            color: #000;
+            font-weight: bold;
+            border-radius: 8px;
+            box-shadow: 0 0 20px #00ff88;
+            animation: slideIn 0.5s ease-out, fadeOut 0.5s 2.5s forwards;
+        }
+
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+    </style>
+</head>
+<body>
+
+    <button id="ping-btn">Send Bright Alert!</button>
+    <div id="notif-container"></div>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        const socket = io('http://localhost:3000'); // Connects to the server
+        const btn = document.getElementById('ping-btn');
+        const container = document.getElementById('notif-container');
+
+        // 1. Send signal to server when clicked
+        btn.onclick = () => {
+            socket.emit('send-ping');
+        };
+
+        // 2. Listen for signal from server
+        socket.on('receive-ping', () => {
+            const notif = document.createElement('div');
+            notif.className = 'notification';
+            notif.innerText = '✨ SOMEONE PINGED THE SITE! ✨';
+            container.appendChild(notif);
+
+            // Remove from DOM after animation
+            setTimeout(() => notif.remove(), 3000);
+        });
+    </script>
+</body>
+</html>
