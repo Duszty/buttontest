@@ -2,75 +2,91 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Ping</title>
+    <title>Mega Ping</title>
     <style>
         body { 
+            background: #1a1a1a; 
+            color: white; 
             display: flex; 
+            flex-direction: column;
             justify-content: center; 
             align-items: center; 
             height: 100vh; 
-            background: #121212; 
             margin: 0; 
-            font-family: sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background 0.2s;
         }
-        
+
+        /* The Flash Effect */
+        body.alert-active { background: #ff0055; }
+
         #ping-btn {
-            padding: 20px 40px;
-            font-size: 1.5rem;
+            padding: 25px 50px;
+            font-size: 2rem;
+            font-weight: bold;
             cursor: pointer;
-            background: #007bff;
-            color: white;
+            background: linear-gradient(45deg, #00dbde, #fc00ff);
             border: none;
-            border-radius: 50px;
-            box-shadow: 0 0 15px rgba(0, 123, 255, 0.5);
+            border-radius: 15px;
+            color: white;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
             transition: transform 0.1s;
         }
 
-        #ping-btn:active { transform: scale(0.95); }
+        #ping-btn:active { transform: scale(0.9); }
 
-        .notification {
+        .notif {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 20px;
-            background: #00ff88; /* Bright green */
-            color: #000;
-            font-weight: bold;
-            border-radius: 8px;
-            box-shadow: 0 0 20px #00ff88;
-            animation: slideIn 0.5s ease-out, fadeOut 0.5s 2.5s forwards;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 40px;
+            background: white;
+            color: black;
+            font-size: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 0 100px #fff;
+            z-index: 1000;
+            animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+        @keyframes pop {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
     </style>
 </head>
 <body>
 
-    <button id="ping-btn">Send Bright Alert!</button>
-    <div id="notif-container"></div>
+    <button id="ping-btn">TRIGGER GLOBAL ALERT</button>
 
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
-        const socket = io('http://localhost:3000'); // Connects to the server
+        const socket = io('http://localhost:3000');
         const btn = document.getElementById('ping-btn');
-        const container = document.getElementById('notif-container');
+        const body = document.body;
 
-        // 1. Send signal to server when clicked
+        // Send signal to server
         btn.onclick = () => {
             socket.emit('send-ping');
         };
 
-        // 2. Listen for signal from server
+        // Listen for signal (from self or others)
         socket.on('receive-ping', () => {
-            const notif = document.createElement('div');
-            notif.className = 'notification';
-            notif.innerText = '✨ SOMEONE PINGED THE SITE! ✨';
-            container.appendChild(notif);
+            // Visual Alert 1: Bright Background Flash
+            body.classList.add('alert-active');
+            
+            // Visual Alert 2: Pop-up Box
+            const box = document.createElement('div');
+            box.className = 'notif';
+            box.innerText = '🚨 ALERT TRIGGERED! 🚨';
+            document.body.appendChild(box);
 
-            // Remove from DOM after animation
-            setTimeout(() => notif.remove(), 3000);
+            // Clean up after 1 second
+            setTimeout(() => {
+                body.classList.remove('alert-active');
+                box.remove();
+            }, 1000);
         });
     </script>
 </body>
