@@ -2,91 +2,78 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mega Ping</title>
+    <title>The Ultimate Ping</title>
     <style>
         body { 
-            background: #1a1a1a; 
-            color: white; 
+            background: #000; 
+            margin: 0; 
+            height: 100vh; 
             display: flex; 
-            flex-direction: column;
             justify-content: center; 
             align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            transition: background 0.2s;
+            overflow: hidden;
+            font-family: 'Arial Black', sans-serif;
         }
 
-        /* The Flash Effect */
-        body.alert-active { background: #ff0055; }
-
-        #ping-btn {
-            padding: 25px 50px;
+        #btn {
+            padding: 30px 60px;
             font-size: 2rem;
-            font-weight: bold;
-            cursor: pointer;
-            background: linear-gradient(45deg, #00dbde, #fc00ff);
-            border: none;
-            border-radius: 15px;
             color: white;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            transition: transform 0.1s;
+            background: #ff0000;
+            border: 5px solid white;
+            cursor: pointer;
+            z-index: 10;
         }
 
-        #ping-btn:active { transform: scale(0.9); }
+        /* Screen Shake Animation */
+        .shake { animation: shake 0.2s infinite; }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px); }
+            50% { transform: translate(-3px, -2px); }
+            100% { transform: translate(1px, 1px); }
+        }
 
-        .notif {
+        /* The Blinding Notification */
+        #overlay {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 40px;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: white;
-            color: black;
-            font-size: 3rem;
-            border-radius: 20px;
-            box-shadow: 0 0 100px #fff;
-            z-index: 1000;
-            animation: pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
         }
 
-        @keyframes pop {
-            0% { transform: translate(-50%, -50%) scale(0); }
-            100% { transform: translate(-50%, -50%) scale(1); }
-        }
+        h1 { color: black; font-size: 5rem; text-align: center; }
     </style>
 </head>
-<body>
+<body id="body">
 
-    <button id="ping-btn">TRIGGER GLOBAL ALERT</button>
+    <div id="overlay"><h1>🚨 PINGED! 🚨</h1></div>
+    <button id="btn">SEND TO EVERYONE</button>
 
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script>
         const socket = io('http://localhost:3000');
-        const btn = document.getElementById('ping-btn');
-        const body = document.body;
+        const overlay = document.getElementById('overlay');
+        const body = document.getElementById('body');
 
-        // Send signal to server
-        btn.onclick = () => {
+        // When YOU click the button
+        document.getElementById('btn').onclick = () => {
             socket.emit('send-ping');
         };
 
-        // Listen for signal (from self or others)
+        // When the SERVER sends the signal (To You & Others)
         socket.on('receive-ping', () => {
-            // Visual Alert 1: Bright Background Flash
-            body.classList.add('alert-active');
-            
-            // Visual Alert 2: Pop-up Box
-            const box = document.createElement('div');
-            box.className = 'notif';
-            box.innerText = '🚨 ALERT TRIGGERED! 🚨';
-            document.body.appendChild(box);
+            // Trigger the visual chaos
+            overlay.style.display = 'flex';
+            body.classList.add('shake');
 
-            // Clean up after 1 second
+            // Turn it off after 800ms
             setTimeout(() => {
-                body.classList.remove('alert-active');
-                box.remove();
-            }, 1000);
+                overlay.style.display = 'none';
+                body.classList.remove('shake');
+            }, 800);
         });
     </script>
 </body>
